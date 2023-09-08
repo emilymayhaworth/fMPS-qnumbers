@@ -93,15 +93,12 @@ class fMPS:
 
         if mode == 'left':
             for i in range(len(self.A) - 1):
-                print("left orth qD", self.qd, self.qD[i:i+2])
                 self.A[i], self.A[i+1], self.qD[i+1] = local_orthonormalize_left_qr(self.A[i], self.A[i+1], self.qd, self.qD[i:i+2])
             # last tensor
-            print("left last orth qD", self.qd, self.qD[-2:])
             self.A[-1], T, self.qD[-1] = local_orthonormalize_left_qr(self.A[-1], np.array([[[1]]]), self.qd, self.qD[-2:])
             # normalization factor (real-valued since diagonal of R matrix is real)
             assert T.shape == (1, 1, 1)
             nrm = T[0, 0, 0].real
-            print("nrm left", nrm)
             if nrm < 0:
                 # flip sign such that normalization factor is always non-negative
                 self.A[-1] = -self.A[-1]
@@ -109,10 +106,8 @@ class fMPS:
             return nrm
         if mode == 'right':
             for i in reversed(range(1, len(self.A))):
-                print("right orth qD", self.qd, self.qD, self.qD[i:i+2])
                 self.A[i], self.A[i-1], self.qD[i] = local_orthonormalize_right_qr(self.A[i], self.A[i-1], self.qd, self.qD[i:i+2])
             # first tensor
-            print("right first orth qD", self.qd, self.qD[:2])
             self.A[0], T, self.qD[0] = local_orthonormalize_right_qr(self.A[0], np.array([[[1]]]), self.qd, self.qD[:2])
             # normalization factor (real-valued since diagonal of R matrix is real)
             assert T.shape == (1, 1, 1)
@@ -191,11 +186,9 @@ def local_orthonormalize_left_qr(A: np.ndarray, Anext: np.ndarray, qd: Sequence[
     # perform QR decomposition and replace A by reshaped Q matrix
     s = A.shape
     assert len(s) == 3
-    print("qD original local orth", qd, qD)
     q0 = qnumber_flatten([qd, qD[0]])
     print("qD q0 local orth", q0)
     Q, R, qbond = qr(A.reshape((s[0]*s[1], s[2])), q0, qD[1])
-    print("qbond local orth", qbond)
     A = Q.reshape((s[0], s[1], Q.shape[1]))
     # update Anext tensor: multiply with R from left
     Anext = np.tensordot(R, Anext, (1, 1)).transpose((1, 0, 2))

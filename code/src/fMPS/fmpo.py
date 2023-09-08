@@ -255,12 +255,12 @@ def local_orthonormalize_right_qr(A: np.ndarray, Aprev: np.ndarray, qd: Sequence
     # perform QR decomposition and replace A by reshaped Q matrix
     s = A.shape
     assert len(s) == 4
-    q0 = qnumber_flatten([qd, -qd, -qD[1]])
-    Q, R, qbond = qr(A.reshape((s[0]*s[1]*s[2], s[3])), q0, -qD[0])
+    q0 = qnumber_flatten([qd, -qd, qD[1]]) #CHANGED FROM ([qd, -qd, -qD[1]])
+    Q, R, qbond = qr(A.reshape((s[0]*s[1]*s[2], s[3])), q0, qD[0]) #AND HERE , q0, -qD[0])
     A = Q.reshape((s[0], s[1], s[2], Q.shape[1])).transpose((0, 1, 3, 2))
     # update Aprev tensor: multiply with R from right
     Aprev = np.tensordot(Aprev, R, (3, 1))
-    return (A, Aprev, -qbond)
+    return (A, Aprev, qbond) #AND HERE (A, Aprev, -qbond) 
 
 
 def merge_mpo_tensor_pair(A0: np.ndarray, A1: np.ndarray) -> np.ndarray:
